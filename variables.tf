@@ -18,6 +18,19 @@ variable "required" {
 
 ### Dependencies
 
+# If data source is taken from child module it can inadvertently cause resource recreation.
+variable "configuration" {
+  description = "Configuration data such as Tenant ID and Subscription ID."
+  nullable    = false
+  type = object({
+    client_id       = string
+    id              = string
+    object_id       = string
+    subscription_id = string
+    tenant_id       = string
+  })
+}
+
 ### Resources
 
 variable "storage_accounts" {
@@ -197,5 +210,10 @@ variable "storage_accounts" {
     })), [])
     table_encryption_key_type = optional(string, "Service") # Account, Service. Defaults to Service.
     queue_encryption_key_type = optional(string, "Service") # Account, Service. Defaults to Service.
+
+    ###### Role Assignments
+
+    # This allows role assignments to be assigned as part of this module, since scope is already known.
+    role_assignments = optional(any, [])
   }))
 }

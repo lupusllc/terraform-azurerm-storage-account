@@ -61,7 +61,7 @@ locals {
             # Otherwise, construct the subnet ID from the subscription, virtual network name, resource group name, subnet name.
             format(
               "/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Network/virtualNetworks/%s/subnets/%s",
-              data.azurerm_client_config.current.subscription_id,
+              var.configuration.subscription_id,
               item.virtual_network_resource_group_name,
               item.virtual_network_name,
             item.virtual_network_subnet_name)
@@ -87,6 +87,10 @@ locals {
       sas_policy                        = settings.sas_policy
       table_encryption_key_type         = settings.table_encryption_key_type
       queue_encryption_key_type         = settings.queue_encryption_key_type
+
+      ###### Role Assignments
+
+      role_assignments = settings.role_assignments
     }
   ]
 
@@ -94,4 +98,11 @@ locals {
   storage_accounts = {
     for index, settings in local.storage_accounts_list : "${settings.resource_group_name}>${settings.name}" => settings
   }
+
+  # Used to create unique id for for_each loops, as just using the name may not be unique.
+  # Filters out any empty role assignment lists.
+  role_assignments = {
+    for index, settings in local.storage_accounts_list : "${settings.resource_group_name}>${settings.name}" => settings.role_assignments if length(settings.role_assignments) > 0
+  }
+
 }
