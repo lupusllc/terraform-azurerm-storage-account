@@ -14,6 +14,8 @@ terraform {
 
 ### Resources:
 
+###### Main
+
 resource "azurerm_storage_account" "this" {
   for_each = local.storage_accounts
 
@@ -259,16 +261,36 @@ resource "azurerm_storage_account" "this" {
   queue_encryption_key_type = each.value.queue_encryption_key_type
 }
 
-##### Role Assignments
+###### Sub-resource & Additional Modules
 
 module "lupus_az_role_assignment" {
-  source  = "lupusllc/role-assignment/azurerm" # https://registry.terraform.io/modules/lupusllc/storage-account/azurerm/latest
-  version = "0.0.1"
-  for_each = local.role_assignments
+  depends_on = [azurerm_storage_account.this] # Ensures resource group exists before role assignments are created.
+  source  = "lupusllc/role-assignment/azurerm" # https://registry.terraform.io/modules/lupusllc/role-assignment/azurerm/latest
+  version = "0.0.2"
 
-  role_assignments = [for role in each.value : merge(role, {
-    scope = azurerm_storage_account.this[each.key].id
-    # Create a unique ID for each role assignment to avoid collisions, we can't use scope since it isn't known a new resource.
-    unique_for_each_id = format("%s>%s>%s", each.key, role.principal_id, coalesce(try(role.role_definition_name, null), try(role.role_definition_id, null)))
-  })]
+  ### Basic
+
+  role_assignments = local.role_assignments
+}
+
+module "lupus_az_storage_container" {
+  depends_on = [azurerm_storage_account.this] # Ensures resource group exists before role assignments are created.
+  source  = "lupusllc/storage-container/azurerm" # https://registry.terraform.io/modules/lupusllc/storage-container/azurerm/latest
+  version = "0.0.2"
+
+  ### Basic
+
+  configuration      = var.configuration
+  storage_containers = local.storage_containers
+}
+
+module "lupus_az_storage_management_policy" {
+  depends_on = [azurerm_storage_account.this] # Ensures resource group exists before role assignments are created.
+  source  = "lupusllc/storage-management-policy/azurerm" # https://registry.terraform.io/modules/lupusllc/storage-management-policy/azurerm/latest
+  version = "0.0.2"
+
+  ### Basic
+
+  configuration               = var.configuration
+  storage_management_policies = local.storage_management_policies
 }

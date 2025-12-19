@@ -389,3 +389,6 @@ crash.*.log
 # Include lock file to ensure consistent provider versions across environments
 # Remove the leading '#' from the next line if you want to ignore it (not recommended)
 #**/.terraform.lock.hcl
+
+# Terraform plan output files
+**/*tfplan
