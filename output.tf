@@ -3,6 +3,11 @@ output "storage_accounts" {
   value       = azurerm_storage_account.this
 }
 
+output "storage_account_monitor_diagnostic_settings" {
+  description = "The storage account monitor diagnostic settings."
+  value       = module.lupus_az_monitor_diagnostic_setting.monitor_diagnostic_settings
+}
+
 output "storage_account_role_assignments" {
   description = "The storage account role assignments."
   value       = module.lupus_az_role_assignment.role_assignments
@@ -26,6 +31,10 @@ output "var_storage_accounts" {
 
 output "local_storage_accounts" {
   value = local.storage_accounts
+}
+
+output "local_storage_account_monitor_diagnostic_settings" {
+  value = local.monitor_diagnostic_settings
 }
 
 output "local_storage_account_role_assignments" {

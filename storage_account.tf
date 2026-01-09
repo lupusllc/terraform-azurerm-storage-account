@@ -263,10 +263,21 @@ resource "azurerm_storage_account" "this" {
 
 ###### Sub-resource & Additional Modules
 
+module "lupus_az_monitor_diagnostic_setting" {
+  depends_on = [azurerm_storage_account.this] # Ensures resource group exists before role assignments are created.
+  source  = "lupusllc/monitor-diagnostic-setting/azurerm" # https://registry.terraform.io/modules/lupusllc/monitor-diagnostic-setting/azurerm/latest
+  version = "0.0.1"
+
+  ### Basic
+
+  configuration               = var.configuration
+  monitor_diagnostic_settings = local.monitor_diagnostic_settings
+}
+
 module "lupus_az_role_assignment" {
   depends_on = [azurerm_storage_account.this] # Ensures resource group exists before role assignments are created.
   source  = "lupusllc/role-assignment/azurerm" # https://registry.terraform.io/modules/lupusllc/role-assignment/azurerm/latest
-  version = "0.0.2"
+  version = "0.0.3"
 
   ### Basic
 
@@ -276,7 +287,7 @@ module "lupus_az_role_assignment" {
 module "lupus_az_storage_container" {
   depends_on = [azurerm_storage_account.this] # Ensures resource group exists before role assignments are created.
   source  = "lupusllc/storage-container/azurerm" # https://registry.terraform.io/modules/lupusllc/storage-container/azurerm/latest
-  version = "0.0.2"
+  version = "0.0.3"
 
   ### Basic
 
@@ -287,7 +298,7 @@ module "lupus_az_storage_container" {
 module "lupus_az_storage_management_policy" {
   depends_on = [azurerm_storage_account.this] # Ensures resource group exists before role assignments are created.
   source  = "lupusllc/storage-management-policy/azurerm" # https://registry.terraform.io/modules/lupusllc/storage-management-policy/azurerm/latest
-  version = "0.0.2"
+  version = "0.0.3"
 
   ### Basic
 
